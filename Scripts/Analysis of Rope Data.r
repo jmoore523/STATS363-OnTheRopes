@@ -7,7 +7,7 @@ rm(list=ls())
 library(plyr)
 library(ggplot2)
 library(lattice)
-library(splines)
+library(stringr)
 
 # Map paths
 setwd('/Users/jmoore523/Dropbox/Graduate School/Q2 - Winter 2016/STATS263/Final Project/STATS363-OnTheRopes')
@@ -19,7 +19,7 @@ output <- file.path(".", "Output")
 ropedata <- read.csv('input/Rope Data.csv', header=TRUE)
 ropedata <- subset(ropedata, ropedata$Additional.Length.with.Weight.Inches!='NA')
 ropedata$Rope.Type <- factor(ropedata$Rope.Type)
-ropedata$Diameter <- factor(ropedata$Diameter)
+ropedata$Diameter <- factor(ropedata$Diameter, c(" 1/4", " 3/8", " 1/2", " 5/8"))
 ropedata$Block <- factor(ropedata$Block)
 
 # Rename Columns
@@ -40,7 +40,8 @@ ropedata$DiameterNum2 <- ropedata$DiameterNum^2
 # Boxplot, by Material
 png(paste0(output,'/Material_Box_Plot.png'))
 par(mgp=c(2.5,1,0))
-par(mar=c(5.1, 4.1, 2.5, 2.1))
+par(mar=c(5.1, 4.1, 1.0, 2.1))
+par(las=1)
 plot(ropedata$Material, ropedata$AddtlLen,
      xlab = "Material",
      xaxt = 'n',
@@ -53,27 +54,48 @@ par(mgp=c(3,1,0))
 par(mar=c(5.1, 4.1, 4.1, 2.1))
 dev.off()
 
-png(paste0(output,'/Diameter Box Plot.png'))
+png(paste0(output,'/Diameter_Box_Plot.png'))
+par(mgp=c(2.5,1,0))
+par(mar=c(5.1, 4.1, 1.0, 2.1))
+par(las=1)
 plot(ropedata$Diameter, ropedata$AddtlLen,
      xlab = "Diameter",
-     ylab = "Extension (Inches)")
+     xaxt = 'n',
+     ylab = "Extension (Inches)",
+     ylim=c(0,2),
+     cex.axis=1.35,
+     cex.lab=1.5)
+axis(1, at=c(1,2,3,4), labels=c("1/4","3/8","1/2","5/8"), cex.axis=1.35)
+par(mgp=c(3,1,0))
+par(mar=c(5.1, 4.1, 4.1, 2.1))
 dev.off()
 
 # Average Length/Diameter, Grouped by Material
 avglen.by.diam.mat <- aggregate(ropedata$AddtlLen, by=list(ropedata$Material, ropedata$Diameter), FUN=mean)
 avglen.by.diam.mat <- rename(avglen.by.diam.mat, c("Group.1"="Material", "Group.2"="Diameter", "x"="AddtlLen"))
 
-png(paste0(output,'/Avg Rope Extension.png'))
+png(paste0(output,'/Avg_Rope_Extension.png'))
+par(mgp=c(2.5,1,0))
+par(mar=c(5.1, 4.1, 2.5, 2.1))
 qplot(x=Diameter, y=AddtlLen, 
       data=avglen.by.diam.mat, 
       colour=Material, 
       xlab = "Diameter",
       ylab = "Average Extension (Inches)") +
+  ylim(0,2) +
   geom_point() +
   geom_line(aes(group=Material)) +
   theme(legend.position="bottom", 
         legend.title=element_blank(),
-        legend.text = element_text(size = 11))
+        legend.text = element_text(size=17),
+        axis.text=element_text(size=17, colour="black"),
+        axis.title=element_text(size=19),
+        axis.title.x=element_text(vjust=-0.05),
+        axis.title.y=element_text(vjust=0.7),
+        panel.background=element_rect(fill = "white"),
+        panel.border=element_rect(fill=NA, colour = "black", size=0.75))
+par(mgp=c(3,1,0))
+par(mar=c(5.1, 4.1, 4.1, 2.1))
 dev.off()
 
 ## Logged ANOVA
@@ -88,17 +110,64 @@ rope.predict.log <- predict(rope.anova.log)
 rope.resid.log <- ropedata$lnAddtlLen - rope.predict.log
 
 # Normal probability plot of residuals
-qqnorm(rope.resid.log)
+png(paste0(output,'/QQPlot.png'))
+par(mgp=c(2.5,1,0))
+par(mar=c(5.1, 4.1, 1.0, 2.1))
+par(las=1)
+qqnorm(rope.resid.log, 
+       main='',
+       cex.axis=1.35,
+       cex.lab=1.5)
 qqline(rope.resid.log)
+par(mgp=c(3,1,0))
+par(mar=c(5.1, 4.1, 4.1, 2.1))
+dev.off()
 
 # Residuals vs. Predicted values
-plot(rope.predict.log, rope.resid.log)
+png(paste0(output,'/Resid_V_Fitted.png'))
+par(mgp=c(2.5,1,0))
+par(mar=c(5.1, 4.1, 1.0, 2.1))
+par(las=1)
+plot(rope.predict.log, rope.resid.log, 
+     xlab="Fitted values",
+     ylab="Residuals",
+     cex.axis=1.35,
+     cex.lab=1.5)
+par(mgp=c(3,1,0))
+par(mar=c(5.1, 4.1, 4.1, 2.1))
+dev.off()
 
 # Residuals vs. Material type
-plot(as.numeric(ropedata$Material), rope.resid.log)
+png(paste0(output,'/Resid_V_Material.png'))
+par(mgp=c(2.5,1,0))
+par(mar=c(5.1, 4.1, 1.0, 3))
+par(las=1)
+plot(as.numeric(ropedata$Material), rope.resid.log,
+  xlab = "Material",
+  xaxt = 'n',
+  ylab = "Residuals",
+  cex.axis=1.35,
+  cex.lab=1.5)
+axis(1, at=c(1,2,3,4), labels=c("Cotton","Manila","Nylon","Polypropylene"), cex.axis=1.35)
+par(mgp=c(3,1,0))
+par(mar=c(5.1, 4.1, 4.1, 2.1))
+dev.off()
 
 # Residuals vs. Diameter
-plot(as.numeric(ropedata$Diameter), rope.resid.log)
+png(paste0(output,'/Resid_V_Diameter.png'))
+par(mgp=c(2.5,1,0))
+par(mar=c(5.1, 4.1, 1.0, 2.1))
+par(las=1)
+plot(as.numeric(ropedata$Diameter), rope.resid.log,
+     xlab = "Diameter",
+     xaxt = 'n',
+     ylab = "Residuals",
+     cex.axis=1.35,
+     cex.lab=1.5)
+axis(1, at=c(1,2,3,4), labels=c("1/4","3/8","1/2","5/8"), cex.axis=1.35)
+par(mgp=c(3,1,0))
+par(mar=c(5.1, 4.1, 4.1, 2.1))
+dev.off()
 
 ## Tukey's test
 TukeyHSD(rope.anova.log, which='Material', ordered = FALSE, conf.level = 0.95)

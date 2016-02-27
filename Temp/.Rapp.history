@@ -1,0 +1,2 @@
+load("/Users/jmoore523/Dropbox/Graduate School/Q2 - Winter 2016/STATS263/Final Project/STATS363-OnTheRopes/Temp/Ropedata.RData")
+names(ropedata)

@@ -97,7 +97,7 @@ plot(as.numeric(ropedata$Block), rope.resid.logreg,
      ylab = "Residuals",
      cex.axis=1.35,
      cex.lab=1.5)
-axis(1, at=c(1,2,3,4), labels=c("1","2","3","3"), cex.axis=1.35)
+axis(1, at=c(1,2,3,4), labels=c("1","2","3","4"), cex.axis=1.35)
 par(mgp=c(3,1,0))
 par(mar=c(5.1, 4.1, 4.1, 2.1))
 dev.off()

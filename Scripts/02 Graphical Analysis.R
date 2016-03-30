@@ -29,7 +29,6 @@ qplot(x=Diameter, y=AddtlLen,
       ylab = "Extension (Inches)") +
   ylim(0,2) +
   geom_point() +
-  geom_jitter(position = position_jitter(width = .004)) +
   theme(legend.position="bottom", 
         legend.title=element_blank(),
         legend.text = element_text(size=17),
